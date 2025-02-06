@@ -1,7 +1,3 @@
-
----
-
-```markdown
 # Product Requirements Document (PRD): Databricks Job Automation Agent
 
 ## 1. Introduction
@@ -25,6 +21,7 @@ The project will deliver an AI agent that:
 - **Tech Lead:** The persona responsible for task analysis and assignment.
 - **Worker:** The persona executing the tasks following a validate-plan-apply workflow.
 - **SDK:** Software Development Kit.
+- **ASK:** Agent Software Kit.
 - **Retriever:** A tool for fetching relevant documentation content.
 - **State Database:** A storage system for task statuses (e.g., IN_PROGRESS, COMPLETE, FAILED).
 
@@ -68,13 +65,22 @@ The agent also integrates several external tools to enhance its capabilities and
   - Must record task states (e.g., IN_PROGRESS, COMPLETE, FAILED).
   - Enable efficient querying and updating of task statuses.
 
+- **Unity Catalog Integration:**
+  - Integrate with the Unity Catalog AI package to leverage UC functions as agile automation tools.
+  - Use the `UnitycatalogFunctionClient` for initializing and managing UC functions.
+  - For Databricks-managed Unity Catalog setups, support configuration with the `DatabricksFunctionClient`.
+  - Provide functionality to create UC functions using Python callables or SQL definitions.
+  - Expose UC functions as native Langchain tools via the `UCFunctionToolkit` for dynamic function invocation within the automation workflow.
+  - Ensure robust error handling, logging, and secure management of function definitions.
+  - **Reference:** [Unity Catalog Integration with Langchain](https://github.com/unitycatalog/unitycatalog/tree/main/ai/integrations/langchain)
+
 ### 3.3 Workflow Execution
 
 - **Validation:**  
   Confirm prerequisites and current task state before proceeding.
 
 - **Planning:**  
-  Break down the task into a detailed list of steps, similar to Terraform’s plan phase.
+  Break down the task into a detailed list of steps, similar to Terraform's plan phase.
 
 - **Application:**  
   Execute the planned steps by interfacing with external tools and update the task state accordingly.
@@ -83,6 +89,30 @@ The agent also integrates several external tools to enhance its capabilities and
 
 - Implement robust error handling for failures in any phase of the workflow.
 - Log critical events, decisions, and state changes to aid in troubleshooting and auditing.
+
+### 3.5 Evaluation and Feedback for GenAI Agents
+
+- **Automated Performance Evaluation:**
+  - Integrate Databricks capabilities for evaluating GenAI agents through a custom metrics framework.
+  - Implement a custom metrics system that allows developers to define evaluation metrics in Python (e.g., using the `@metric` decorator).
+  - Leverage MLflow's evaluation method to pass these custom metrics via the `extra_metrics` field in `mlflow.evaluate()`.
+
+- **Custom Metrics Requirements:**
+  - Must allow developers to write custom evaluation metrics that can return pass/fail (e.g., `"yes"` or `"no"`), numeric (integers or floats), or boolean values.
+  - Custom metrics should have full access to the evaluation data, including input requests, expected outputs, retrieved context, and detailed execution traces.
+  - Enable the use of custom fields (e.g., a `custom_expected` field) to supply additional context for metric computations.
+  - Ensure that the custom metrics framework is flexible enough to evaluate key performance indicators—such as response accuracy, retrieval precision, and compliance with guidelines—tailored to specific business use cases.
+  - Integrate the output of custom metrics with dashboards, logs, and automated alerts to enable continuous monitoring and rapid troubleshooting.
+  - **Reference:** [Custom Metrics Documentation](https://docs.databricks.com/en/generative-ai/agent-evaluation/custom-metrics.html)
+
+- **User Feedback Incorporation:**
+  - Provide mechanisms to capture end-user feedback through Databricks-supported interfaces.
+  - Leverage this feedback in combination with custom metrics results to iteratively improve the AI agent's performance.
+
+- **Continuous Monitoring and Iterative Improvement:**
+  - Implement dashboards and logging integrations (e.g., via MLflow) for real-time monitoring of evaluation metrics.
+  - Set up automated alerts using Databricks monitoring solutions to quickly identify and address performance degradations.
+  - Define processes for periodically reviewing the custom metric evaluations and feedback, ensuring that insights are used to update the agent configuration and improve external integrations.
 
 ## 4. Non-functional Requirements
 
@@ -161,7 +191,7 @@ The agent also integrates several external tools to enhance its capabilities and
 
 - **Phase 2: Core Functionality Implementation**  
   - Develop the Tech Lead process.
-  - Implement the Worker’s validate-plan-apply workflow.
+  - Implement the Worker's validate-plan-apply workflow.
 
 - **Phase 3: Full Integration & Testing**  
   - Integrate with the Databricks Python SDK.

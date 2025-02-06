@@ -152,6 +152,7 @@ version = "0.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "databricks-agents" },
+    { name = "databricks-connect" },
     { name = "databricks-langchain" },
     { name = "databricks-sdk" },
     { name = "langgraph" },
@@ -165,6 +166,7 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "databricks-agents", specifier = ">=0.15.0" },
+    { name = "databricks-connect", specifier = "==15.1.0" },
     { name = "databricks-langchain", specifier = ">=0.2.0" },
     { name = "databricks-sdk", specifier = ">=0.43.0" },
     { name = "langgraph", specifier = ">=0.2.69" },
