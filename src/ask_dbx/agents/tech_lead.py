@@ -4,7 +4,7 @@ from databricks_langchain import ChatDatabricks
 from langchain.prompts import PromptTemplate
 from langchain.output_parsers import PydanticOutputParser
 from langchain.schema.output_parser import StrOutputParser
-from typing import Literal
+from typing import Literal, List
 from pydantic import BaseModel, Field
 from langchain_core.documents import Document
 from langchain_core.retrievers import BaseRetriever
@@ -45,6 +45,10 @@ class FilterResponse(BaseModel):
     verification: Literal["relevant", "irrelevant"] = Field(
         ..., description="Answer must be one of 'relevant' or 'irrelevant'."
     )
+
+
+class TaskList(BaseModel):
+    tasks: List[Task]
 
 
 class TechLead:
@@ -128,6 +132,15 @@ class TechLead:
         rating_prompt = PromptTemplate.from_template(rating_template)
         self.rating_chain = rating_prompt | self.llm.with_structured_output(PlanRating)
 
+        split_plan_template = (
+            "The final plan is as follows:\n{plan}\n\n"
+            "Please split this plan into a list of individual tasks. Each task should include"
+            "a 'details' field describing the task"
+        )
+        self.split_plan_chain = PromptTemplate.from_template(
+            split_plan_template
+        ) | self.llm.with_structured_output(TaskList)
+
     def analyze_job_requirements(self) -> Task:
         """
         Builds a LangGraph-based agent that:
@@ -178,12 +191,14 @@ class TechLead:
                 query, k=10, query_type="hybrid", columns=["content", "chunk_id"]
             )
             for d in doc_chunks:
-                # Store the full document and initialize scoring flags.
-                state["docs"][d.metadata["id"]] = {
-                    "doc": d,
-                    "filter_score": None,
-                    "verify_score": None,
-                }
+                doc_id = d.metadata["id"]
+                # Only add the doc if it hasn't already been processed.
+                if doc_id not in state["docs"]:
+                    state["docs"][doc_id] = {
+                        "doc": d,
+                        "filter_score": None,
+                        "verify_score": None,
+                    }
             print(
                 f"Retrieve Docs: Retrieved {len(doc_chunks)} chunks using query: {query}"
             )
@@ -198,6 +213,7 @@ class TechLead:
             unscored_ids = []
             unscored_inputs = []
             for doc_id, doc_info in docs.items():
+                print(doc_info)
                 if doc_info["filter_score"] is None:
                     unscored_inputs.append(
                         {
@@ -329,16 +345,27 @@ class TechLead:
         compiled_graph = graph.compile()
         final_state = compiled_graph.invoke(initial_state)
 
-        # Build the final Task.
-        task = Task(
-            id=1,
-            details=final_state.get("plan", "No plan generated."),
-            documentation="\n".join(
-                info["doc"].page_content
-                for info in final_state.get("docs", {}).values()
-            ),
-            state="PENDING",
+        generated_tasks = self.split_plan_chain.invoke(
+            {"plan": final_state.get("plan", "No plan generated.")}
         )
+
+        # Build the final Task.
+        tasks = [
+            Task(
+                objective=task.objective,
+                steps=task.steps,
+                documentation="\n".join(
+                    info["doc"].page_content
+                    for info in final_state.get("docs", {}).values()
+                ),
+            )
+            for task in generated_tasks.tasks
+        ]
         print("TechLead: Finalized task details:")
-        print(task.details)
-        return task
+        for task in tasks:
+            print(task.objective)
+            print("--------")
+            for step in task.steps:
+                print(step)
+            print("--------")
+        return tasks
