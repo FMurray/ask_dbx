@@ -8,6 +8,10 @@ class Settings(BaseSettings):
 
     databricks_token: str = Field(..., env="DATABRICKS_TOKEN")
     databricks_host: str = Field(..., env="DATABRICKS_HOST")
+    uc_catalog: str = Field(..., env="UC_CATALOG")
+    uc_schema: str = Field(..., env="UC_SCHEMA")
+    secret_scope: str = Field(..., env="SECRET_SCOPE")
+    secret_key: str = Field(..., env="SECRET_KEY")
 
     # Agents Specific Settings
     default_agent_timeout: int = Field(60, env="AGENT_TIMEOUT")
@@ -19,7 +23,7 @@ class Settings(BaseSettings):
 
     # Integrations Specific Settings
     retriever_endpoint: str = Field(
-        "https://e2-demo-field-eng.cloud.databricks.com/ml/endpoints/agents_robert-dbdemos_rag_chatbot-rag_agent/invocations",
+        ...,
         env="RETRIEVER_ENDPOINT",
     )
     retriever_index: str = Field("ask-dbx", env="RETRIEVER_INDEX")

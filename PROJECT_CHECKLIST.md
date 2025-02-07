@@ -16,8 +16,9 @@
 
 ## 3. Multi-Persona Architecture Implementation
 ### Tech Lead Component
-- [ ] Implement job requirement interpretation.
-- [ ] Integrate the retriever tool for fetching relevant documentation.
+- [x] Implement job requirement interpretation.
+- [x] Integrate the retriever tool for fetching relevant documentation.
+- [x] Generate plan & tasks
 - [ ] Design and implement the task assignment process to the Worker.
 
 ### Worker Component
@@ -28,7 +29,7 @@
   - Update the state database according to task progress.
 
 ## 4. Tool Integrations
-- [ ] **Retriever:**
+- [x] **Retriever:**
   - Implement keyword-based documentation retrieval.
   - Validate relevance of retrieved content.
 - [ ] **Databricks Python SDK:**

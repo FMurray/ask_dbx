@@ -15,10 +15,12 @@ dependencies = [
     "rich>=13.9.4",
     "unitycatalog-langchain[databricks]>=0.1.0",
     "databricks-connect==15.1.0",
+    "pillow>=11.1.0",
 ]
 
 [project.scripts]
 hello = "ask_dbx:hello"
+tech_lead = "ask_dbx:tech_lead"
 
 [build-system]
 requires = ["hatchling"]
