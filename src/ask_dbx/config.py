@@ -19,10 +19,19 @@ class Settings(BaseSettings):
 
     # Integrations Specific Settings
     retriever_endpoint: str = Field(
-        "https://default-databricks-vector-search.example.com", env="RETRIEVER_ENDPOINT"
+        "https://e2-demo-field-eng.cloud.databricks.com/ml/endpoints/agents_robert-dbdemos_rag_chatbot-rag_agent/invocations",
+        env="RETRIEVER_ENDPOINT",
     )
+    retriever_index: str = Field("ask-dbx", env="RETRIEVER_INDEX")
     state_db_path: str = Field("data/state.db", env="STATE_DB_PATH")
     markdown_path: str = Field("data/tasks.md", env="MARKDOWN_PATH")
+    job_requirements_path: str = Field(
+        "data/requirements.md", env="JOB_REQUIREMENTS_PATH"
+    )
+    mlflow_experiment: str = Field(
+        "/Users/forrest.murray@databricks.com/ask_dbx", env="MLFLOW_EXPERIMENT"
+    )
+    gpt_model: str = Field("agents-demo-gpt4o")
 
 
 # Instantiate a single settings object that all modules can import

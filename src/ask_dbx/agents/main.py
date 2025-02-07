@@ -3,11 +3,22 @@ from ask_dbx.integrations import state_db, markdown_manager, retriever
 from ask_dbx.tools.databricks_sdk import DatabricksClient
 from ask_dbx.agents.tech_lead import TechLead
 from ask_dbx.agents.worker import Worker
+import mlflow
+import os
 
 
 def main():
-    # Initialize integration components with the global settings
-    retriever_client = retriever.Retriever(settings)
+    # Set up MLflow tracking to Databricks
+    os.environ["MLFLOW_TRACKING_URI"] = "databricks"
+    # Set the experiment name
+    mlflow.set_experiment(settings.mlflow_experiment)
+
+    # Enable MLflow tracing for LangChain (if you're using it)
+    mlflow.langchain.autolog()
+
+    retriever_client = retriever.get_retriever(settings)
+
+    # Initialize the Databricks client
     databricks_client = DatabricksClient(settings)
     markdown_mgr = markdown_manager.MarkdownManager(settings)
     state_database = state_db.StateDatabase(settings)
@@ -16,9 +27,15 @@ def main():
     tech_lead = TechLead(retriever_client, settings)
     worker = Worker(databricks_client, markdown_mgr, state_database, settings)
 
-    # Orchestrate the process:
-    # 1. Tech Lead analyzes the job requirements and creates a task.
-    task = tech_lead.analyze_job_requirements()
+    # Start an MLflow run to track the tech lead analysis
+    with mlflow.start_run(run_name="tech_lead_analysis"):
+        # 1. Tech Lead analyzes the job requirements and creates a task.
+        task = tech_lead.analyze_job_requirements()
+
+        # Log the task output
+        mlflow.log_text(str(task), "task_output.txt")
+
+    print(task)
 
     # 2. Worker processes the task using the validate-plan-apply workflow.
-    worker.process_task(task)
+    # worker.process_task(task)
