@@ -4,15 +4,20 @@ from ask_dbx.integrations import state_db, markdown_manager, retriever
 from ask_dbx.tools.databricks_sdk import DatabricksSDKRegistrar
 from ask_dbx.agents.tech_lead import TechLead
 from ask_dbx.agents.worker import Worker
+from ask_dbx.tools.unitycatalog_toolkit import UnityCatalogToolkit
 import mlflow
 import os
 import io
 
 
 def main():
-    registrar = DatabricksSDKRegistrar()
-    registrar.register_all_uc_functions()
+    # registrar = DatabricksSDKRegistrar()
+    # registrar.register_all_uc_functions()
 
+    toolkit = UnityCatalogToolkit(settings)
+
+    result = toolkit.invoke_tool("forrest_murray.rag_demo.list_zones_sql")
+    print("Deserialized result:", result)
     # # Set up MLflow tracking to Databricks
     # os.environ["MLFLOW_TRACKING_URI"] = "databricks"
     # # Set the experiment name

@@ -246,10 +246,10 @@ $$;
 
         # Build SQL parameter definitions and call list.
         param_decls, param_calls = self.get_sql_parameters(func)
-        full_param_decls = (
-            f"{param_decls}, secret STRING" if param_decls else "secret STRING"
-        )
-        # For the SQL wrapper call, we append the secret literal.
+        # full_param_decls = (
+        #     f"{param_decls}, secret STRING" if param_decls else "secret STRING"
+        # )
+        # # For the SQL wrapper call, we append the secret literal.
         if param_calls:
             call_arguments = f"{param_calls}, {self.get_sql_secret_placeholder(secret_scope, secret_key)}"
         else:
@@ -257,7 +257,7 @@ $$;
 
         func_name = f"{settings.uc_catalog}.{settings.uc_schema}.{func.__name__}_sql"
         comment = func.__doc__ or "No description available."
-        sql_body = f"""CREATE OR REPLACE FUNCTION {func_name}({full_param_decls})
+        sql_body = f"""CREATE OR REPLACE FUNCTION {func_name}({param_decls})
 RETURNS STRING
 LANGUAGE SQL
 COMMENT {repr(comment)}
